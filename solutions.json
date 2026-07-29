@@ -1,0 +1,612 @@
+{
+ "Two Sum": {
+  "signal": "find a pair adding up to a target",
+  "complexity": "O(n) time · O(n) space",
+  "approach": "Keep a map of numbers already seen. For each new number, check if its partner (target - x) is already in the map — if yes, done. Check first, insert after, so a number can't pair with itself.",
+  "code": "unordered_map<int,int> seen;\nfor (int i = 0; i < n; i++) {\n    if (seen.count(target - nums[i]))\n        return {seen[target - nums[i]], i};\n    seen[nums[i]] = i;\n}"
+ },
+ "Binary Search": {
+  "signal": "find a target in a sorted array",
+  "complexity": "O(log n)",
+  "approach": "Keep a lo..hi range that must contain the answer. Compare the middle with the target and throw away the useless half each round. Use lo + (hi-lo)/2 for mid to avoid overflow, and be consistent about <= vs < — boundary sloppiness is where all binary search bugs live.",
+  "code": "int lo = 0, hi = n - 1;\nwhile (lo <= hi) {\n    int mid = lo + (hi - lo) / 2;\n    if (a[mid] == target) return mid;\n    if (a[mid] < target) lo = mid + 1;\n    else hi = mid - 1;\n}\nreturn -1;"
+ },
+ "Fibonacci Number": {
+  "signal": "answer built from the two previous answers",
+  "complexity": "O(n) time · O(1) space",
+  "approach": "f(n) = f(n-1) + f(n-2). Plain recursion recomputes the same values exponentially many times — instead walk forward keeping just the last two numbers. This two-variable trick is the baby version of every 'depends on i-1 and i-2' DP.",
+  "code": "int a = 0, b = 1;\nfor (int i = 0; i < n; i++) {\n    int t = a + b;\n    a = b; b = t;\n}\nreturn a;"
+ },
+ "Subsets": {
+  "signal": "list ALL subsets / combinations",
+  "complexity": "O(2ⁿ)",
+  "approach": "Backtracking with a start index: at each level, choose an element from start onward, recurse with i+1, then un-choose (pop). The start index means you never look back, so no subset appears twice. Record the path at every node — every path IS a subset.",
+  "code": "void bt(int start, vector<int>& path) {\n    res.push_back(path);          // every path counts\n    for (int i = start; i < n; i++) {\n        path.push_back(nums[i]);  // choose\n        bt(i + 1, path);          // explore\n        path.pop_back();          // un-choose\n    }\n}"
+ },
+ "Reverse Linked List": {
+  "signal": "reverse a list · building block for many list problems",
+  "complexity": "O(n) time · O(1) space",
+  "approach": "Three pointers: prev, cur, next. Save next, flip cur's arrow to prev, slide everything one step. When cur falls off the end, prev is the new head. Drill this until automatic — palindrome check and reorder-list are built from it.",
+  "code": "ListNode *prev = nullptr, *cur = head;\nwhile (cur) {\n    ListNode* nxt = cur->next;\n    cur->next = prev;\n    prev = cur;\n    cur = nxt;\n}\nreturn prev;"
+ },
+ "Linked List Cycle": {
+  "signal": "does the list loop?",
+  "complexity": "O(n) time · O(1) space",
+  "approach": "Slow pointer moves 1 step, fast moves 2. If there's a loop, fast laps slow and they meet; if not, fast hits null. No extra memory — the two speeds do what a visited-set would.",
+  "code": "ListNode *slow = head, *fast = head;\nwhile (fast && fast->next) {\n    slow = slow->next;\n    fast = fast->next->next;\n    if (slow == fast) return true;\n}\nreturn false;"
+ },
+ "Merge Two Sorted Lists": {
+  "signal": "combine two sorted lists into one",
+  "complexity": "O(m+n)",
+  "approach": "Use a dummy node so the head is never a special case. Walk both lists, always attaching the smaller front node. When one list runs out, attach whatever remains of the other in one go.",
+  "code": "ListNode dummy, *tail = &dummy;\nwhile (a && b) {\n    if (a->val <= b->val) { tail->next = a; a = a->next; }\n    else                  { tail->next = b; b = b->next; }\n    tail = tail->next;\n}\ntail->next = a ? a : b;\nreturn dummy.next;"
+ },
+ "Reverse Integer": {
+  "signal": "reverse digits with overflow rules",
+  "complexity": "O(digits)",
+  "approach": "Pop the last digit with % 10, push it onto the result with result*10 + digit, shrink x with / 10. The whole problem is really the overflow check: before pushing, verify result won't exceed INT_MAX/10 — checking after is already too late.",
+  "code": "int rev = 0;\nwhile (x != 0) {\n    int d = x % 10; x /= 10;\n    if (rev > INT_MAX/10 || rev < INT_MIN/10)\n        return 0;           // would overflow\n    rev = rev * 10 + d;\n}"
+ },
+ "Longest Common Prefix": {
+  "signal": "common starting part of many strings",
+  "complexity": "O(total chars)",
+  "approach": "Start with the first string as the candidate prefix. For each next string, shrink the candidate from the back until it actually prefixes that string. Whatever survives all strings is the answer — an empty survivor means no common prefix.",
+  "code": "string pre = strs[0];\nfor (int i = 1; i < (int)strs.size(); i++) {\n    while (strs[i].find(pre) != 0) {\n        pre.pop_back();\n        if (pre.empty()) return \"\";\n    }\n}\nreturn pre;"
+ },
+ "Sort an Array": {
+  "signal": "implement O(n log n) sort yourself",
+  "complexity": "O(n log n)",
+  "approach": "Merge sort: split in half, sort each half recursively, merge the two sorted halves with two pointers. The merge is the whole algorithm — everything smaller from either side goes first. (Quicksort also works but needs random pivots here, or sorted-input tests TLE it.)",
+  "code": "void merge(int l, int m, int r) {\n    // two pointers over a[l..m] and a[m+1..r]\n    // copy the smaller front into a temp, then back\n}\nvoid sortRange(int l, int r) {\n    if (l >= r) return;\n    int m = l + (r - l) / 2;\n    sortRange(l, m); sortRange(m + 1, r);\n    merge(l, m, r);\n}"
+ },
+ "Concatenation of Array": {
+  "signal": "warm-up: build [nums, nums]",
+  "complexity": "O(n)",
+  "approach": "Answer index i is nums[i % n] — one loop of 2n steps. The takeaway worth keeping: the modulo trick for anything circular or repeated.",
+  "code": "vector<int> ans(2 * n);\nfor (int i = 0; i < 2 * n; i++)\n    ans[i] = nums[i % n];"
+ },
+ "Shuffle the Array": {
+  "signal": "interleave [x1..xn, y1..yn] into [x1,y1,x2,y2...]",
+  "complexity": "O(n)",
+  "approach": "Element i of the first half goes to position 2i; element i of the second half goes to 2i+1. Writing the index formula directly beats simulating the shuffle.",
+  "code": "vector<int> ans(2 * n);\nfor (int i = 0; i < n; i++) {\n    ans[2 * i]     = nums[i];\n    ans[2 * i + 1] = nums[i + n];\n}"
+ },
+ "Max Consecutive Ones": {
+  "signal": "longest run of 1s",
+  "complexity": "O(n)",
+  "approach": "One running counter: +1 on a 1, reset to 0 on a 0. Track the best value the counter ever reaches. The simplest possible 'streak' pattern — the same shape as Kadane's with the numbers stripped out.",
+  "code": "int cur = 0, best = 0;\nfor (int x : nums) {\n    cur = x ? cur + 1 : 0;\n    best = max(best, cur);\n}"
+ },
+ "Valid Palindrome": {
+  "signal": "palindrome check ignoring punctuation/case",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Two pointers from both ends. Skip anything that isn't a letter or digit, lowercase both sides, compare. Mismatch = false; pointers crossing = true. No cleaned copy of the string needed.",
+  "code": "int l = 0, r = s.size() - 1;\nwhile (l < r) {\n    while (l < r && !isalnum(s[l])) l++;\n    while (l < r && !isalnum(s[r])) r--;\n    if (tolower(s[l++]) != tolower(s[r--]))\n        return false;\n}\nreturn true;"
+ },
+ "Valid Palindrome II": {
+  "signal": "palindrome after deleting at most one character",
+  "complexity": "O(n)",
+  "approach": "Two pointers inward. On the FIRST mismatch, you get one free delete — try skipping the left char OR the right char, and check if either remaining stretch is a clean palindrome. Only one branch point ever happens, so it stays linear.",
+  "code": "bool isPal(int l, int r) {\n    while (l < r)\n        if (s[l++] != s[r--]) return false;\n    return true;\n}\n// main walk:\nif (s[l] != s[r])\n    return isPal(l + 1, r) || isPal(l, r - 1);"
+ },
+ "Reverse String": {
+  "signal": "reverse in place",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Two pointers at the ends, swap, move inward. The 'hello world' of two-pointer problems — worth having as pure muscle memory.",
+  "code": "int l = 0, r = s.size() - 1;\nwhile (l < r)\n    swap(s[l++], s[r--]);"
+ },
+ "Move Zeroes": {
+  "signal": "push zeros to the end, keep order, in place",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Reader/writer pointers: the reader scans everything, the writer only accepts non-zeros. Everything before the writer is finished output. Fill the tail with zeros afterward.",
+  "code": "int w = 0;\nfor (int r = 0; r < n; r++)\n    if (nums[r] != 0)\n        nums[w++] = nums[r];\nwhile (w < n)\n    nums[w++] = 0;"
+ },
+ "Merge Sorted Array": {
+  "signal": "merge B into A which has spare space at the end",
+  "complexity": "O(m+n) · in place",
+  "approach": "Merge from the BACK: place the biggest of the two tails into A's last free slot. Writing forward would overwrite unread values; writing backward never can, because the write position stays ahead of both read positions.",
+  "code": "int i = m - 1, j = n - 1, k = m + n - 1;\nwhile (j >= 0)\n    A[k--] = (i >= 0 && A[i] > B[j])\n           ? A[i--] : B[j--];"
+ },
+ "Squares of a Sorted Array": {
+  "signal": "sorted array (with negatives) → sorted squares",
+  "complexity": "O(n)",
+  "approach": "After squaring, the biggest values sit at the two ENDS (large negatives and large positives). Two pointers at the ends, write the bigger square into the output from the back. No sorting needed — the structure survives the squaring.",
+  "code": "int l = 0, r = n - 1, w = n - 1;\nwhile (l <= r) {\n    if (abs(a[l]) > abs(a[r]))\n        out[w--] = a[l] * a[l], l++;\n    else\n        out[w--] = a[r] * a[r], r--;\n}"
+ },
+ "Happy Number": {
+  "signal": "repeat a digit operation — does it reach 1 or loop forever?",
+  "complexity": "O(log n) per step",
+  "approach": "Repeatedly replace n with the sum of squared digits. Unhappy numbers fall into a loop — detect it with a seen-set, or slicker, with slow/fast pointers (Floyd), since 'apply f repeatedly' is a linked list in disguise.",
+  "code": "int next(int n) {\n    int s = 0;\n    while (n) { int d = n % 10; s += d * d; n /= 10; }\n    return s;\n}\nint slow = n, fast = n;\ndo { slow = next(slow); fast = next(next(fast)); }\nwhile (slow != fast);\nreturn slow == 1;"
+ },
+ "Ransom Note": {
+  "signal": "can you build string A from the letters of string B?",
+  "complexity": "O(m+n)",
+  "approach": "Count B's letters into a 26-slot array, then walk A subtracting. Any count going negative means B ran out of that letter. Letter-count arrays beat maps here — the alphabet is tiny and fixed.",
+  "code": "int cnt[26] = {};\nfor (char c : magazine) cnt[c - 'a']++;\nfor (char c : note)\n    if (--cnt[c - 'a'] < 0) return false;\nreturn true;"
+ },
+ "Contains Duplicate": {
+  "signal": "any value appearing twice?",
+  "complexity": "O(n)",
+  "approach": "Throw everything into a set; insertion failing (or set smaller than the array) means a duplicate exists. The one-liner: build the set, compare sizes.",
+  "code": "unordered_set<int> s(nums.begin(), nums.end());\nreturn s.size() < nums.size();"
+ },
+ "Contains Duplicate II": {
+  "signal": "duplicate within distance k",
+  "complexity": "O(n)",
+  "approach": "Map each value to the LAST index where you saw it. On a repeat, check if the gap is ≤ k; either way, update the stored index. You only ever need the most recent sighting — earlier ones are strictly worse.",
+  "code": "unordered_map<int,int> last;\nfor (int i = 0; i < n; i++) {\n    auto it = last.find(nums[i]);\n    if (it != last.end() && i - it->second <= k)\n        return true;\n    last[nums[i]] = i;\n}\nreturn false;"
+ },
+ "Length of Last Word": {
+  "signal": "length of the final word",
+  "complexity": "O(n)",
+  "approach": "Scan from the END: skip trailing spaces, then count characters until the next space. Going backward means you never care about anything before the last word.",
+  "code": "int i = s.size() - 1, len = 0;\nwhile (i >= 0 && s[i] == ' ') i--;\nwhile (i >= 0 && s[i] != ' ') { len++; i--; }\nreturn len;"
+ },
+ "Reverse Words in a String": {
+  "signal": "flip word order, clean up spaces",
+  "complexity": "O(n)",
+  "approach": "Neat trick: reverse the ENTIRE string, then reverse each word individually — the words end up in reversed order but reading normally. Handle extra spaces with a writer pointer compacting as you go. All in place, no split/join allocations.",
+  "code": "reverse(s.begin(), s.end());\n// then for each word [i, j):\nreverse(s.begin() + i, s.begin() + j);\n// plus a writer pointer to squeeze spaces"
+ },
+ "Valid Parentheses": {
+  "signal": "brackets nesting correctly",
+  "complexity": "O(n)",
+  "approach": "Stack: push every opener; on a closer, the stack top must be its matching opener — pop it, or fail. Success = string ends with an empty stack. Nesting means 'last opened, first closed', which is literally what a stack is.",
+  "code": "stack<char> st;\nfor (char c : s) {\n    if (c=='(' || c=='[' || c=='{') st.push(c);\n    else {\n        if (st.empty()) return false;\n        char open = st.top(); st.pop();\n        if ((c==')' && open!='(') ||\n            (c==']' && open!='[') ||\n            (c=='}' && open!='{')) return false;\n    }\n}\nreturn st.empty();"
+ },
+ "Guess Number Higher or Lower": {
+  "signal": "guessing game with higher/lower feedback",
+  "complexity": "O(log n)",
+  "approach": "Pure binary search where the API is your comparison: guess the middle, the response tells you which half to keep. The value of this problem is seeing binary search work without an array — any 'higher/lower' oracle supports it.",
+  "code": "int lo = 1, hi = n;\nwhile (lo <= hi) {\n    int mid = lo + (hi - lo) / 2;\n    int g = guess(mid);\n    if (g == 0) return mid;\n    if (g < 0) hi = mid - 1;\n    else lo = mid + 1;\n}"
+ },
+ "Min Stack": {
+  "signal": "stack with getMin() in O(1)",
+  "complexity": "O(1) all ops",
+  "approach": "Each entry stores its value AND the minimum at the moment it was pushed. Popping automatically restores the older minimum — every element remembers its own era. The general lesson: precompute answers at write time, not at question time.",
+  "code": "stack<pair<int,int>> st;  // {value, min so far}\nvoid push(int x) {\n    int m = st.empty() ? x : min(x, st.top().second);\n    st.push({x, m});\n}\nint getMin() { return st.top().second; }"
+ },
+ "Minimum Cost of Buying Candies With Discount": {
+  "signal": "buy 2, cheapest third is free",
+  "complexity": "O(n log n)",
+  "approach": "Sort prices in DESCENDING order and take them in groups of three — pay for the two expensive ones, the third (cheapest of each trio) is free. Greedy works because you want the freebies to be as expensive as possible, which happens when you group expensive candies together.",
+  "code": "sort(cost.rbegin(), cost.rend());\nint total = 0;\nfor (int i = 0; i < (int)cost.size(); i++)\n    if (i % 3 != 2)      // every third is free\n        total += cost[i];"
+ },
+ "Evaluate Reverse Polish Notation": {
+  "signal": "postfix expression evaluation",
+  "complexity": "O(n)",
+  "approach": "Stack: numbers get pushed; an operator pops TWO values, applies, pushes the result. Watch the order — the first pop is the RIGHT operand. RPN exists precisely because it evaluates with nothing but a stack, no brackets needed.",
+  "code": "stack<long long> st;\nfor (auto& t : tokens) {\n    if (isOp(t)) {\n        long long b = st.top(); st.pop();\n        long long a = st.top(); st.pop();\n        st.push(apply(a, b, t));   // a op b\n    } else st.push(stoll(t));\n}\nreturn st.top();"
+ },
+ "Best Time to Buy and Sell Stock": {
+  "signal": "one buy, one sell, max profit",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Walk once, remembering the cheapest price seen so far. At every day, profit-if-sold-today = price − cheapest-so-far; track the best. You're testing every sell day against its best possible buy day, in one pass.",
+  "code": "int lo = INT_MAX, best = 0;\nfor (int p : prices) {\n    lo = min(lo, p);\n    best = max(best, p - lo);\n}"
+ },
+ "Maximum Average Subarray I": {
+  "signal": "best window of exactly size k",
+  "complexity": "O(n)",
+  "approach": "Fixed-size sliding window: compute the first window's sum, then slide — add the entering element, subtract the leaving one. Never recompute a window from scratch; each step is O(1).",
+  "code": "long long sum = 0;\nfor (int i = 0; i < k; i++) sum += nums[i];\nlong long best = sum;\nfor (int i = k; i < n; i++) {\n    sum += nums[i] - nums[i - k];\n    best = max(best, sum);\n}"
+ },
+ "Search in Rotated Sorted Array": {
+  "signal": "sorted array rotated at an unknown point",
+  "complexity": "O(log n)",
+  "approach": "At every mid, one half is always properly sorted — figure out which by comparing a[lo] with a[mid]. If the target's value fits inside the sorted half's range, search there; otherwise search the other half. Rotation breaks sortedness, but never in both halves at once.",
+  "code": "while (lo <= hi) {\n    int mid = lo + (hi - lo) / 2;\n    if (a[mid] == t) return mid;\n    if (a[lo] <= a[mid]) {          // left half clean\n        if (a[lo] <= t && t < a[mid]) hi = mid - 1;\n        else lo = mid + 1;\n    } else {                        // right half clean\n        if (a[mid] < t && t <= a[hi]) lo = mid + 1;\n        else hi = mid - 1;\n    }\n}"
+ },
+ "Find Minimum in Rotated Sorted Array": {
+  "signal": "smallest element after rotation",
+  "complexity": "O(log n)",
+  "approach": "Compare a[mid] with a[hi]: if a[mid] > a[hi], the drop (and the minimum) is to the RIGHT of mid; otherwise the minimum is at mid or left. Shrink toward the drop. Note it's mid vs HI, not mid vs lo — that comparison handles the not-rotated case for free.",
+  "code": "int lo = 0, hi = n - 1;\nwhile (lo < hi) {\n    int mid = lo + (hi - lo) / 2;\n    if (a[mid] > a[hi]) lo = mid + 1; // min is right\n    else hi = mid;                    // min is here/left\n}\nreturn a[lo];"
+ },
+ "Koko Eating Bananas": {
+  "signal": "minimum speed to finish in h hours",
+  "complexity": "O(n log maxPile)",
+  "approach": "Binary search the ANSWER: if speed s works, every faster speed works too — that yes/no boundary is searchable. The checker just simulates: hours = sum of ceil(pile / s). Find the first speed that fits in h.",
+  "code": "long long hours(int s) {\n    long long h = 0;\n    for (int p : piles) h += (p + s - 1) / s;\n    return h;\n}\nint lo = 1, hi = maxPile;\nwhile (lo < hi) {\n    int mid = lo + (hi - lo) / 2;\n    if (hours(mid) <= h) hi = mid;\n    else lo = mid + 1;\n}"
+ },
+ "Capacity To Ship Packages Within D Days": {
+  "signal": "minimum capacity to ship in D days",
+  "complexity": "O(n log sum)",
+  "approach": "Same shape as Koko: binary search the capacity. Checker greedily fills days — start a new day whenever the current load would overflow. Bounds matter: lo = biggest single package (must fit), hi = sum of everything (one day).",
+  "code": "int days(int cap) {\n    int d = 1, load = 0;\n    for (int w : weights) {\n        if (load + w > cap) { d++; load = 0; }\n        load += w;\n    }\n    return d;\n}\n// binary search first cap with days(cap) <= D"
+ },
+ "Split Array Largest Sum": {
+  "signal": "split into k parts minimizing the biggest part",
+  "complexity": "O(n log sum)",
+  "approach": "'Minimize the maximum' is the classic binary-search-the-answer flag. Guess a cap; greedily count how many pieces you need if no piece may exceed it; too many pieces means the cap is too small. Identical skeleton to ship-packages — recognizing the reskin IS the skill.",
+  "code": "int pieces(long long cap) {\n    int cnt = 1; long long cur = 0;\n    for (int x : nums) {\n        if (cur + x > cap) { cnt++; cur = 0; }\n        cur += x;\n    }\n    return cnt;\n}\n// binary search smallest cap with pieces(cap) <= k"
+ },
+ "Remove Duplicates from Sorted Array": {
+  "signal": "dedupe a sorted array in place",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Sorted means duplicates are neighbors. Writer pointer accepts an element only if it differs from the last written one. Return the writer position — it's the new length.",
+  "code": "int w = 1;\nfor (int r = 1; r < n; r++)\n    if (nums[r] != nums[w - 1])\n        nums[w++] = nums[r];\nreturn w;"
+ },
+ "Remove Nth Node From End of List": {
+  "signal": "delete n-th from the end, one pass",
+  "complexity": "O(n) · one pass",
+  "approach": "Two pointers n steps apart: give the lead a head start of n, then move both until the lead hits the end — the trailer stands right before the victim. Start the trailer at a dummy node so deleting the head isn't a special case.",
+  "code": "ListNode dummy(0, head);\nListNode *lead = &dummy, *trail = &dummy;\nfor (int i = 0; i <= n; i++) lead = lead->next;\nwhile (lead) { lead = lead->next; trail = trail->next; }\ntrail->next = trail->next->next;\nreturn dummy.next;"
+ },
+ "Find All Anagrams in a String": {
+  "signal": "all positions where an anagram of p starts",
+  "complexity": "O(n)",
+  "approach": "Anagram = same letter counts. Slide a window of p's length across s, updating two counts per step (one letter in, one out), and record positions where the 26-slot count arrays match. Comparing two int[26] arrays is constant work — totally fine.",
+  "code": "array<int,26> need{}, have{};\nfor (char c : p) need[c - 'a']++;\nfor (int i = 0; i < n; i++) {\n    have[s[i] - 'a']++;\n    if (i >= m) have[s[i - m] - 'a']--;\n    if (i >= m - 1 && have == need)\n        out.push_back(i - m + 1);\n}"
+ },
+ "Product of Array Except Self": {
+  "signal": "product of everything except me, no division",
+  "complexity": "O(n) · O(1) extra",
+  "approach": "Two sweeps: left-to-right writes 'product of everything before me' into the answer; right-to-left multiplies in 'product of everything after me' using one running variable. Division fails on zeros — this never touches it.",
+  "code": "vector<int> res(n, 1);\nfor (int i = 1; i < n; i++)\n    res[i] = res[i-1] * nums[i-1];\nint suf = 1;\nfor (int i = n - 1; i >= 0; i--) {\n    res[i] *= suf;\n    suf *= nums[i];\n}"
+ },
+ "Minimum Window Substring": {
+  "signal": "smallest window of s containing all letters of t",
+  "complexity": "O(n)",
+  "approach": "Grow the right edge until the window contains everything; then shrink the left edge as far as possible, recording the best. The speed trick: one counter of 'how many letter-types are fully satisfied', so completeness checks are O(1) instead of rescanning the counts map.",
+  "code": "// have[c], need[c], formed = satisfied types\nif (++have[c] == need[c]) formed++;\nwhile (formed == required) {\n    // record best window [l, r]\n    char d = s[l++];\n    if (have[d]-- == need[d]) formed--;\n}"
+ },
+ "Container With Most Water": {
+  "signal": "two walls holding the most water",
+  "complexity": "O(n)",
+  "approach": "Two pointers at the ends. Area = width × shorter wall. Always move the SHORTER wall's pointer: the width only shrinks as you move inward, so the only hope of improvement is finding a taller short-side. Moving the taller one can never help — that's the proof.",
+  "code": "int l = 0, r = n - 1, best = 0;\nwhile (l < r) {\n    best = max(best, (r - l) * min(h[l], h[r]));\n    if (h[l] < h[r]) l++;\n    else r--;\n}"
+ },
+ "Sort Colors": {
+  "signal": "sort an array of 0s, 1s, 2s in one pass",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Dutch flag, three pointers: zeros swap to the front (lo), twos swap to the back (hi), ones walk past. Key detail: after swapping a 2 to the back, do NOT advance mid — the value you just received is unexamined. That's the line everyone gets wrong first try.",
+  "code": "int lo = 0, mid = 0, hi = n - 1;\nwhile (mid <= hi) {\n    if (a[mid] == 0) swap(a[lo++], a[mid++]);\n    else if (a[mid] == 2) swap(a[mid], a[hi--]);\n    else mid++;\n}"
+ },
+ "3Sum": {
+  "signal": "all unique triplets summing to zero",
+  "complexity": "O(n²)",
+  "approach": "Sort. Fix the first number, then two-pointer the rest for pairs hitting the remaining target. Skip duplicates at BOTH levels (same fixed number, same pair values) — sorting is what makes both the pointer walk and the dup-skipping possible.",
+  "code": "sort(a.begin(), a.end());\nfor (int i = 0; i < n - 2; i++) {\n    if (i && a[i] == a[i-1]) continue;\n    int l = i + 1, r = n - 1;\n    while (l < r) {\n        int s = a[i] + a[l] + a[r];\n        if (s < 0) l++;\n        else if (s > 0) r--;\n        else {\n            res.push_back({a[i], a[l], a[r]});\n            while (l < r && a[l] == a[l+1]) l++;\n            while (l < r && a[r] == a[r-1]) r--;\n            l++; r--;\n        }\n    }\n}"
+ },
+ "4Sum": {
+  "signal": "quadruplets hitting a target",
+  "complexity": "O(n³)",
+  "approach": "3Sum with one more fixed layer: two nested loops fix the first two numbers, two pointers find the remaining pair. Same duplicate-skipping at every level. Use long long for the sum — four ints can overflow, and that's the hidden test case.",
+  "code": "for (int i = 0; i < n - 3; i++) {\n    if (i && a[i] == a[i-1]) continue;\n    for (int j = i + 1; j < n - 2; j++) {\n        if (j > i + 1 && a[j] == a[j-1]) continue;\n        long long rem = (long long)target - a[i] - a[j];\n        // two-pointer a[j+1..n-1] for sum == rem\n    }\n}"
+ },
+ "Search a 2D Matrix": {
+  "signal": "each row sorted AND row starts ascending",
+  "complexity": "O(log mn)",
+  "approach": "The matrix is really one long sorted array cut into rows. Binary search over indexes 0..m·n−1, converting each mid to a cell with row = mid / cols, col = mid % cols. One search, no cleverness about rows needed.",
+  "code": "int lo = 0, hi = m * n - 1;\nwhile (lo <= hi) {\n    int mid = lo + (hi - lo) / 2;\n    int v = mat[mid / cols][mid % cols];\n    if (v == target) return true;\n    if (v < target) lo = mid + 1;\n    else hi = mid - 1;\n}"
+ },
+ "Search a 2D Matrix II": {
+  "signal": "rows sorted AND columns sorted (but not flattened-sorted)",
+  "complexity": "O(m + n)",
+  "approach": "Staircase walk from the TOP-RIGHT corner: current value too big → step left (kills a column); too small → step down (kills a row). Every step permanently eliminates a full row or column, so at most m+n steps. The corner choice is everything — top-left has no such elimination property.",
+  "code": "int r = 0, c = cols - 1;\nwhile (r < rows && c >= 0) {\n    if (mat[r][c] == target) return true;\n    if (mat[r][c] > target) c--;   // kill column\n    else r++;                      // kill row\n}"
+ },
+ "Next Permutation": {
+  "signal": "rearrange into the next bigger ordering",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Three steps: (1) from the right, find the first position that's smaller than its neighbor — the 'dip'; (2) swap it with the smallest element to its right that's still bigger; (3) reverse everything after the dip (that tail was descending — make it ascending, i.e. smallest). No dip found = whole array descending = wrap to sorted.",
+  "code": "int i = n - 2;\nwhile (i >= 0 && a[i] >= a[i+1]) i--;   // the dip\nif (i >= 0) {\n    int j = n - 1;\n    while (a[j] <= a[i]) j--;\n    swap(a[i], a[j]);\n}\nreverse(a.begin() + i + 1, a.end());"
+ },
+ "Middle of the Linked List": {
+  "signal": "find the middle in one pass",
+  "complexity": "O(n) · one pass",
+  "approach": "Slow moves 1, fast moves 2 — when fast runs off the end, slow stands at the middle. With even length this lands on the SECOND middle, which is what the problem wants.",
+  "code": "ListNode *slow = head, *fast = head;\nwhile (fast && fast->next) {\n    slow = slow->next;\n    fast = fast->next->next;\n}\nreturn slow;"
+ },
+ "Two Sum II - Input Array Is Sorted": {
+  "signal": "pair summing to target — but sorted this time",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Sorted input upgrades Two Sum from a hash map to two pointers: ends inward, sum too small → move left up, too big → move right down. Sortedness guarantees you never skip the answer. Same problem, better tool — the input's structure decides the technique.",
+  "code": "int l = 0, r = n - 1;\nwhile (l < r) {\n    int s = a[l] + a[r];\n    if (s == target) return {l + 1, r + 1};\n    if (s < target) l++;\n    else r--;\n}"
+ },
+ "Permutation in String": {
+  "signal": "does s2 contain a rearrangement of s1?",
+  "complexity": "O(n)",
+  "approach": "A permutation is just an anagram — so slide a window of s1's length over s2 and compare letter counts, updating two entries per slide. This is Find-All-Anagrams asked as a yes/no. Recognizing 'permutation = anagram = same counts' is the entire problem.",
+  "code": "array<int,26> need{}, have{};\nfor (char c : s1) need[c - 'a']++;\nfor (int i = 0; i < (int)s2.size(); i++) {\n    have[s2[i] - 'a']++;\n    if (i >= m) have[s2[i - m] - 'a']--;\n    if (i >= m - 1 && have == need) return true;\n}\nreturn false;"
+ },
+ "Minimum Size Subarray Sum": {
+  "signal": "shortest subarray with sum ≥ target (all positives)",
+  "complexity": "O(n)",
+  "approach": "Variable window: extend right adding to the sum; while the sum ≥ target, record the length and shrink from the left. Works because all numbers are positive — growing always increases the sum, shrinking always decreases it. (Negatives would break that promise; then you'd need prefix sums + a deque.)",
+  "code": "int l = 0, best = INT_MAX;\nlong long sum = 0;\nfor (int r = 0; r < n; r++) {\n    sum += nums[r];\n    while (sum >= target) {\n        best = min(best, r - l + 1);\n        sum -= nums[l++];\n    }\n}"
+ },
+ "Set Matrix Zeroes": {
+  "signal": "zero out rows/columns containing a zero, O(1) space",
+  "complexity": "O(mn) · O(1) space",
+  "approach": "Use the first row and first column AS the markers: a zero at (r, c) marks row r's first cell and column c's first cell. Second pass zeros everything marked. Two flags remember whether the first row/column themselves need clearing — handle them LAST, or the markers get destroyed early.",
+  "code": "// pass 1: mat[r][0] = mat[0][c] = 0 as marks\n// pass 2 (skip row 0 / col 0):\nfor (int r = 1; r < m; r++)\n    for (int c = 1; c < n; c++)\n        if (!mat[r][0] || !mat[0][c])\n            mat[r][c] = 0;\n// pass 3: clear row 0 / col 0 via saved flags"
+ },
+ "Remove Element": {
+  "signal": "remove all copies of a value, in place",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Writer pointer keeps everything that isn't the target value. The simplest member of the reader/writer family — same skeleton as Move Zeroes and Remove Duplicates.",
+  "code": "int w = 0;\nfor (int r = 0; r < n; r++)\n    if (nums[r] != val)\n        nums[w++] = nums[r];\nreturn w;"
+ },
+ "Range Sum Query - Immutable": {
+  "signal": "many range-sum questions, data never changes",
+  "complexity": "O(n) build · O(1) query",
+  "approach": "Precompute prefix sums once: pre[i] = sum of the first i elements. Any range sum is then one subtraction: sum(l..r) = pre[r+1] − pre[l]. Build-once-answer-forever — the simplest example of precompute/query separation.",
+  "code": "vector<long long> pre(n + 1, 0);\nfor (int i = 0; i < n; i++)\n    pre[i + 1] = pre[i] + nums[i];\n// query: pre[r + 1] - pre[l]"
+ },
+ "Contiguous Array": {
+  "signal": "longest subarray with equal 0s and 1s",
+  "complexity": "O(n)",
+  "approach": "Convert 0s to −1; now 'equal 0s and 1s' means 'sum is zero'. Walk with a running sum, storing the FIRST index where each sum value appeared — seeing the same sum again means the stretch between sums to zero. Store first occurrences only; later ones give shorter answers.",
+  "code": "unordered_map<int,int> first{{0, -1}};\nint sum = 0, best = 0;\nfor (int i = 0; i < n; i++) {\n    sum += nums[i] ? 1 : -1;\n    if (first.count(sum))\n        best = max(best, i - first[sum]);\n    else first[sum] = i;\n}"
+ },
+ "Defuse the Bomb": {
+  "signal": "each element replaced by a sum of k circular neighbors",
+  "complexity": "O(n)",
+  "approach": "A fixed-size sliding window on a CIRCLE — use index % n to wrap around. Compute the first window, then slide: add the entering element, drop the leaving one. Positive k looks forward, negative k looks backward; only the window's starting offset differs.",
+  "code": "// window of |k| starting at offset\nlong long sum = 0;\nfor (int i = 0; i < k; i++)\n    sum += code[(start + i) % n];\nfor (int i = 0; i < n; i++) {\n    ans[i] = sum;\n    sum -= code[(start + i) % n];\n    sum += code[(start + i + k) % n];\n}"
+ },
+ "Word Search": {
+  "signal": "does a word exist as a path in a letter grid?",
+  "complexity": "O(mn · 3^L)",
+  "approach": "DFS from every cell matching the first letter. Before recursing, overwrite the cell with '#' so this path can't reuse it; RESTORE it after — that restore is the backtrack, and forgetting it is the classic invisible bug. Mismatch or out-of-bounds returns false immediately.",
+  "code": "bool dfs(int r, int c, int i) {\n    if (i == (int)word.size()) return true;\n    if (r<0 || r>=R || c<0 || c>=C\n        || g[r][c] != word[i]) return false;\n    char keep = g[r][c];\n    g[r][c] = '#';\n    bool ok = dfs(r+1,c,i+1) || dfs(r-1,c,i+1)\n           || dfs(r,c+1,i+1) || dfs(r,c-1,i+1);\n    g[r][c] = keep;      // restore!\n    return ok;\n}"
+ },
+ "Palindrome Number": {
+  "signal": "is the number a palindrome — without strings?",
+  "complexity": "O(digits)",
+  "approach": "Reverse only the BACK HALF of the number: pop digits into 'rev' until rev ≥ what's left. Palindrome if they're equal (even length) or equal after dropping rev's last digit (odd length). Half-reversal dodges the overflow problem a full reversal would have.",
+  "code": "if (x < 0 || (x % 10 == 0 && x != 0)) return false;\nint rev = 0;\nwhile (x > rev) {\n    rev = rev * 10 + x % 10;\n    x /= 10;\n}\nreturn x == rev || x == rev / 10;"
+ },
+ "Find the Index of the First Occurrence in a String": {
+  "signal": "substring search (strStr)",
+  "complexity": "O(n·m) naive",
+  "approach": "Try each starting position; compare character by character; return the first full match. Naive is accepted here — but mention KMP exists: it precomputes prefix-repeat info so the text pointer never backs up, giving O(n+m). Knowing WHEN naive suffices is also a skill.",
+  "code": "for (int i = 0; i + m <= n; i++) {\n    int j = 0;\n    while (j < m && h[i + j] == nd[j]) j++;\n    if (j == m) return i;\n}\nreturn -1;"
+ },
+ "Valid Anagram": {
+  "signal": "same letters, different order?",
+  "complexity": "O(n)",
+  "approach": "One 26-slot count array: add for string a, subtract for string b. All zeros at the end = anagram. Length check first exits early. Sorting also works but costs O(n log n) for no benefit.",
+  "code": "if (s.size() != t.size()) return false;\nint cnt[26] = {};\nfor (int i = 0; i < (int)s.size(); i++) {\n    cnt[s[i] - 'a']++;\n    cnt[t[i] - 'a']--;\n}\nfor (int c : cnt) if (c) return false;\nreturn true;"
+ },
+ "Maximum Product of Three Numbers": {
+  "signal": "biggest product of any three elements",
+  "complexity": "O(n)",
+  "approach": "Only two candidates exist: the three biggest numbers, OR the two most negative ones times the biggest (two negatives multiply positive). Track top-3 max and bottom-2 min in one pass and compare the two products. Negatives are the whole problem.",
+  "code": "// track: max1 >= max2 >= max3, min1 <= min2\nreturn max(max1 * max2 * max3,\n           min1 * min2 * max1);"
+ },
+ "Top K Frequent Words": {
+  "signal": "k most frequent, ties broken alphabetically",
+  "complexity": "O(n log n)",
+  "approach": "Count with a map, then sort (or heap) with a two-level comparator: higher count first, and for equal counts, alphabetically smaller first. The problem is really a custom-comparator exercise wearing a frequency costume.",
+  "code": "map<string,int> cnt;\nfor (auto& w : words) cnt[w]++;\nvector<pair<string,int>> v(cnt.begin(), cnt.end());\nsort(v.begin(), v.end(), [](auto& a, auto& b) {\n    if (a.second != b.second)\n        return a.second > b.second;  // count desc\n    return a.first < b.first;        // alpha asc\n});"
+ },
+ "Subarray Sum Equals K": {
+  "signal": "count subarrays summing to k (negatives allowed)",
+  "complexity": "O(n)",
+  "approach": "Running prefix sum + a map counting how often each prefix value occurred. At each step, add how many earlier prefixes equal (current − k) — each one is a valid subarray ending here. Seed the map with {0:1}. Sliding window fails here because negatives break the grow/shrink logic; this doesn't care.",
+  "code": "unordered_map<long long,int> seen{{0, 1}};\nlong long pre = 0; int count = 0;\nfor (int x : nums) {\n    pre += x;\n    count += seen[pre - k];\n    seen[pre]++;\n}"
+ },
+ "Find the Duplicate Number": {
+  "signal": "n+1 values in range 1..n, find the repeat — no modifying, O(1) space",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Treat i → nums[i] as a linked list: the duplicate value is a node with two arrows pointing at it — a cycle entrance. Floyd's algorithm: slow/fast until they meet, then restart one at the beginning; they re-meet exactly at the duplicate. The array-is-secretly-a-linked-list insight is the whole problem.",
+  "code": "int slow = nums[0], fast = nums[0];\ndo {\n    slow = nums[slow];\n    fast = nums[nums[fast]];\n} while (slow != fast);\nslow = nums[0];\nwhile (slow != fast) {\n    slow = nums[slow];\n    fast = nums[fast];\n}\nreturn slow;"
+ },
+ "Maximum Number of Vowels in a Substring of Given Length": {
+  "signal": "most vowels in any window of size k",
+  "complexity": "O(n)",
+  "approach": "Fixed window with a single counter: +1 when a vowel enters, −1 when a vowel leaves, track the max. The counter IS the window's state — no substring extraction, no recount.",
+  "code": "auto isV = [](char c) {\n    return c=='a'||c=='e'||c=='i'||c=='o'||c=='u';\n};\nint cur = 0, best = 0;\nfor (int i = 0; i < n; i++) {\n    cur += isV(s[i]);\n    if (i >= k) cur -= isV(s[i - k]);\n    best = max(best, cur);\n}"
+ },
+ "Same Tree": {
+  "difficulty": "Easy",
+  "topic": "Tree",
+  "signal": "are two trees identical?",
+  "complexity": "O(n)",
+  "approach": "Recurse both trees in lockstep: both null → true; one null or values differ → false; otherwise both left subtrees must match AND both right subtrees must match. Trees with the same shape compare naturally by walking them together.",
+  "code": "bool same(TreeNode* p, TreeNode* q) {\n    if (!p && !q) return true;\n    if (!p || !q || p->val != q->val)\n        return false;\n    return same(p->left, q->left)\n        && same(p->right, q->right);\n}"
+ },
+ "Symmetric Tree": {
+  "difficulty": "Easy",
+  "topic": "Tree",
+  "signal": "is the tree a mirror of itself?",
+  "complexity": "O(n)",
+  "approach": "Mirror check = Same Tree with the sides crossed: compare left's LEFT with right's RIGHT, and left's RIGHT with right's LEFT. One helper taking two nodes, called with (root->left, root->right). The crossing is the entire difference from Same Tree.",
+  "code": "bool mirror(TreeNode* a, TreeNode* b) {\n    if (!a && !b) return true;\n    if (!a || !b || a->val != b->val)\n        return false;\n    return mirror(a->left, b->right)\n        && mirror(a->right, b->left);  // crossed\n}"
+ },
+ "Maximum Depth of Binary Tree": {
+  "difficulty": "Easy",
+  "topic": "Tree",
+  "signal": "how tall is the tree?",
+  "complexity": "O(n)",
+  "approach": "Depth of a node = 1 + the deeper of its two subtrees; an empty tree is 0. Three lines, but it's the template for half of all tree problems: ask both children, combine their answers, add yourself.",
+  "code": "int depth(TreeNode* root) {\n    if (!root) return 0;\n    return 1 + max(depth(root->left),\n                   depth(root->right));\n}"
+ },
+ "Roman to Integer": {
+  "difficulty": "Easy",
+  "topic": "Hash Table",
+  "signal": "parse roman numerals",
+  "complexity": "O(n)",
+  "approach": "Map each symbol to its value. Walk the string: if a symbol is SMALLER than the one after it, subtract it (the IV/IX cases); otherwise add it. That one comparison replaces hardcoding all six subtractive pairs.",
+  "code": "unordered_map<char,int> v{{'I',1},{'V',5},{'X',10},\n    {'L',50},{'C',100},{'D',500},{'M',1000}};\nint ans = 0;\nfor (int i = 0; i < (int)s.size(); i++) {\n    if (i + 1 < (int)s.size() && v[s[i]] < v[s[i+1]])\n        ans -= v[s[i]];    // IV, IX, XL...\n    else ans += v[s[i]];\n}"
+ },
+ "Single Number": {
+  "difficulty": "Easy",
+  "topic": "Bit Manipulation",
+  "signal": "everything appears twice except one",
+  "complexity": "O(n) · O(1) space",
+  "approach": "XOR the whole array. x ^ x = 0 and order doesn't matter, so every pair cancels itself and only the loner survives. No map, no sort — the cleanest O(1)-space answer on LeetCode.",
+  "code": "int ans = 0;\nfor (int x : nums)\n    ans ^= x;    // pairs cancel\nreturn ans;"
+ },
+ "Linked List Cycle II": {
+  "difficulty": "Medium",
+  "topic": "Linked List",
+  "signal": "find WHERE the cycle starts",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Phase 1: slow/fast until they meet inside the loop. Phase 2: put one pointer back at the head, move both 1 step at a time — they meet exactly at the cycle's entrance. The distances work out because head-to-entrance equals meeting-point-to-entrance (mod the loop length).",
+  "code": "ListNode *slow = head, *fast = head;\nwhile (fast && fast->next) {\n    slow = slow->next;\n    fast = fast->next->next;\n    if (slow == fast) {        // phase 2\n        slow = head;\n        while (slow != fast) {\n            slow = slow->next;\n            fast = fast->next;\n        }\n        return slow;           // cycle entrance\n    }\n}\nreturn nullptr;"
+ },
+ "Find Peak Element": {
+  "difficulty": "Medium",
+  "topic": "Binary Search",
+  "signal": "find any peak in O(log n) — array not sorted!",
+  "complexity": "O(log n)",
+  "approach": "If a[mid] < a[mid+1] you're on a rising slope — some peak must exist to the right (the array eventually falls or ends). Otherwise a peak is at mid or left. Binary search without sorted data: all you need is a test that says which half surely contains an answer.",
+  "code": "int lo = 0, hi = n - 1;\nwhile (lo < hi) {\n    int mid = lo + (hi - lo) / 2;\n    if (a[mid] < a[mid + 1])\n        lo = mid + 1;   // rising: peak right\n    else\n        hi = mid;       // peak here or left\n}\nreturn lo;"
+ },
+ "Majority Element": {
+  "difficulty": "Easy",
+  "topic": "Array",
+  "signal": "element appearing more than n/2 times · O(1) space",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Boyer-Moore voting: keep a candidate and a counter. Same element → +1, different → −1, counter hits zero → adopt the current element as the new candidate. The true majority appears more than everything else combined, so it always survives the vote war.",
+  "code": "int cand = 0, count = 0;\nfor (int x : nums) {\n    if (count == 0) cand = x;\n    count += (x == cand) ? 1 : -1;\n}\nreturn cand;"
+ },
+ "Power of Two": {
+  "difficulty": "Easy",
+  "topic": "Bit Manipulation",
+  "signal": "is n a power of two?",
+  "complexity": "O(1)",
+  "approach": "A power of two has exactly ONE bit set. n & (n-1) deletes the lowest set bit — if that leaves zero, there was only one bit. One expression, plus the n > 0 guard (zero and negatives sneak through otherwise).",
+  "code": "return n > 0 && (n & (n - 1)) == 0;"
+ },
+ "Swap Nodes in Pairs": {
+  "difficulty": "Medium",
+  "topic": "Linked List",
+  "signal": "swap every two adjacent nodes",
+  "complexity": "O(n) · O(1) space",
+  "approach": "Dummy node in front, then rewire three arrows per pair: prev→second, first→after-the-pair, second→first. Draw it on paper once — the code is a transcription of the drawing. The dummy makes the first pair a normal case instead of a special one.",
+  "code": "ListNode dummy(0, head), *prev = &dummy;\nwhile (prev->next && prev->next->next) {\n    ListNode *a = prev->next, *b = a->next;\n    a->next = b->next;\n    b->next = a;\n    prev->next = b;\n    prev = a;\n}\nreturn dummy.next;"
+ },
+ "Missing Number": {
+  "difficulty": "Easy",
+  "topic": "Bit Manipulation",
+  "signal": "0..n with one number missing",
+  "complexity": "O(n) · O(1) space",
+  "approach": "XOR all indexes 0..n against all values — every present number cancels with its own index, the missing one remains. (The sum formula n(n+1)/2 − sum also works; XOR just can't overflow.)",
+  "code": "int ans = n;   // the index with no pair\nfor (int i = 0; i < n; i++)\n    ans ^= i ^ nums[i];\nreturn ans;"
+ },
+ "First Bad Version": {
+  "difficulty": "Easy",
+  "topic": "Binary Search",
+  "signal": "versions go good...good, bad...bad — find the first bad",
+  "complexity": "O(log n)",
+  "approach": "The purest 'first true' binary search: if mid is bad, the answer is mid or earlier; if good, it's after mid. This exact skeleton — lo < hi, hi = mid on yes, lo = mid + 1 on no — is the one template worth memorizing for all boundary searches.",
+  "code": "int lo = 1, hi = n;\nwhile (lo < hi) {\n    int mid = lo + (hi - lo) / 2;\n    if (isBadVersion(mid)) hi = mid;\n    else lo = mid + 1;\n}\nreturn lo;   // first bad"
+ },
+ "Find Missing and Repeated Values": {
+  "difficulty": "Easy",
+  "topic": "Matrix",
+  "signal": "n×n grid of 1..n² — one value twice, one missing",
+  "complexity": "O(n²)",
+  "approach": "Count occurrences in a frequency array sized n²+1: the count-2 value is the repeat, the count-0 value is the missing one. When the value range is known and small, counting beats every clever trick.",
+  "code": "vector<int> cnt(n * n + 1, 0);\nfor (auto& row : grid)\n    for (int x : row) cnt[x]++;\nint rep = 0, mis = 0;\nfor (int v = 1; v <= n * n; v++) {\n    if (cnt[v] == 2) rep = v;\n    if (cnt[v] == 0) mis = v;\n}"
+ },
+ "Longest Substring Without Repeating Characters": {
+  "difficulty": "Medium",
+  "topic": "Sliding Window",
+  "signal": "longest stretch with all unique characters",
+  "complexity": "O(n)",
+  "approach": "Sliding window with 'last seen' positions: when the current character was already seen INSIDE the window, jump the left edge to just past its previous position. The window always holds unique characters; track the best length. The jump (instead of step-by-step shrinking) is the polished version.",
+  "code": "vector<int> last(128, -1);\nint l = 0, best = 0;\nfor (int r = 0; r < n; r++) {\n    if (last[s[r]] >= l)\n        l = last[s[r]] + 1;   // jump past repeat\n    last[s[r]] = r;\n    best = max(best, r - l + 1);\n}"
+ },
+ "Intersection of Two Arrays": {
+  "difficulty": "Easy",
+  "topic": "Hash Table",
+  "signal": "unique common elements of two arrays",
+  "complexity": "O(m+n)",
+  "approach": "Put the first array in a set. Walk the second: anything found in the set goes to the answer AND gets erased (so it can't be reported twice). Two sets, two passes, done.",
+  "code": "unordered_set<int> s(a.begin(), a.end());\nvector<int> out;\nfor (int x : b)\n    if (s.erase(x))     // found and removed\n        out.push_back(x);"
+ },
+ "Search Insert Position": {
+  "difficulty": "Easy",
+  "topic": "Binary Search",
+  "signal": "where would the target go in a sorted array?",
+  "complexity": "O(log n)",
+  "approach": "This is lower_bound: the first position whose value is ≥ target. The 'first true' binary search template answers it directly — and in C++ it's literally one library call.",
+  "code": "return lower_bound(nums.begin(), nums.end(),\n                   target) - nums.begin();"
+ },
+ "Combination Sum": {
+  "difficulty": "Medium",
+  "topic": "Backtracking",
+  "signal": "combinations reaching a target, elements reusable",
+  "complexity": "exponential (pruned)",
+  "approach": "Backtracking with a start index — but since elements are REUSABLE, recurse with i (not i+1) after choosing. Subtract from the remaining target; stop when it hits 0 (record) or goes negative (dead branch). Sort first and break early when a candidate exceeds the remainder — that prune does real work.",
+  "code": "void bt(int start, int rem, vector<int>& path) {\n    if (rem == 0) { res.push_back(path); return; }\n    for (int i = start; i < n; i++) {\n        if (c[i] > rem) break;   // sorted: prune\n        path.push_back(c[i]);\n        bt(i, rem - c[i], path); // i again: reuse ok\n        path.pop_back();\n    }\n}"
+ },
+ "Combination Sum II": {
+  "difficulty": "Medium",
+  "topic": "Backtracking",
+  "signal": "combinations to a target — each element once, input has duplicates",
+  "complexity": "exponential (pruned)",
+  "approach": "Two changes from Combination Sum: recurse with i+1 (no reuse), and after sorting, skip a[i] == a[i-1] at the same depth so duplicate values don't create duplicate combinations. That same-level skip is THE duplicate-handling idiom for all backtracking.",
+  "code": "for (int i = start; i < n; i++) {\n    if (i > start && c[i] == c[i-1])\n        continue;              // same choice, same level\n    if (c[i] > rem) break;\n    path.push_back(c[i]);\n    bt(i + 1, rem - c[i], path);  // no reuse\n    path.pop_back();\n}"
+ },
+ "Permutations": {
+  "difficulty": "Medium",
+  "topic": "Backtracking",
+  "signal": "all orderings of the array",
+  "complexity": "O(n · n!)",
+  "approach": "Unlike subsets, every level considers ALL unused elements — track them with a used[] array (or swap-in-place). Choose, mark, recurse, unmark. n! outputs exist, so nothing beats n!; the skeleton just enumerates them cleanly.",
+  "code": "void bt(vector<int>& path) {\n    if ((int)path.size() == n) {\n        res.push_back(path); return;\n    }\n    for (int i = 0; i < n; i++) {\n        if (used[i]) continue;\n        used[i] = true; path.push_back(nums[i]);\n        bt(path);\n        path.pop_back(); used[i] = false;\n    }\n}"
+ },
+ "Target Sum": {
+  "difficulty": "Medium",
+  "topic": "Dynamic Programming",
+  "signal": "assign +/− to every number to hit a target",
+  "complexity": "O(n · sum)",
+  "approach": "Algebra first: if P is the set getting '+', then P − (total − P) = target, so P = (total + target) / 2 — the problem is secretly 'count subsets summing to P', a 0/1 knapsack counting version. Loop the budget DOWNWARD (each number used once). Odd (total+target) → answer is 0.",
+  "code": "int P = (total + target) / 2;\nvector<long long> dp(P + 1, 0);\ndp[0] = 1;\nfor (int x : nums)\n    for (int c = P; c >= x; c--)\n        dp[c] += dp[c - x];\nreturn dp[P];"
+ },
+ "Pow(x, n)": {
+  "difficulty": "Medium",
+  "topic": "Math",
+  "signal": "x to the power n, fast — n can be huge or negative",
+  "complexity": "O(log n)",
+  "approach": "Square-and-multiply: x¹³ = x⁸·x⁴·x¹ — follow n's binary digits, squaring x each round and multiplying the answer in when the bit is 1. Negative n → invert x and negate n, using long long because −INT_MIN overflows int. That overflow IS the hidden test case.",
+  "code": "double myPow(double x, long long n) {\n    if (n < 0) { x = 1 / x; n = -n; }\n    double ans = 1;\n    while (n) {\n        if (n & 1) ans *= x;\n        x *= x;\n        n >>= 1;\n    }\n    return ans;\n}"
+ },
+ "N-Queens": {
+  "difficulty": "Hard",
+  "topic": "Backtracking",
+  "signal": "place n queens so none attack each other",
+  "complexity": "exponential (pruned)",
+  "approach": "One queen per row, so recurse row by row choosing a column. The speed secret: three arrays make the safety check O(1) — a queen at (r, c) owns column c, diagonal r−c, and anti-diagonal r+c. Mark, recurse, unmark. Without the arrays you rescan the board at every node of a huge tree.",
+  "code": "if (col[c] || d1[r - c + n] || d2[r + c])\n    continue;                        // attacked\ncol[c] = d1[r - c + n] = d2[r + c] = true;\nboard[r] = c;\nsolve(r + 1);\ncol[c] = d1[r - c + n] = d2[r + c] = false;"
+ },
+ "Maximum Subarray": {
+  "difficulty": "Medium",
+  "topic": "Dynamic Programming",
+  "signal": "max sum contiguous subarray (Kadane's)",
+  "complexity": "O(n) · O(1) space",
+  "approach": "One pass: cur = best subarray ENDING here = max(this element alone, previous cur + this element). If the old run is negative it can only hurt — restart. Track the best cur ever seen. This is a full DP squeezed into two variables.",
+  "code": "int best = nums[0], cur = nums[0];\nfor (int i = 1; i < n; i++) {\n    cur = max(nums[i], cur + nums[i]);\n    best = max(best, cur);\n}"
+ },
+ "Combinations": {
+  "difficulty": "Medium",
+  "topic": "Backtracking",
+  "signal": "all ways to choose k numbers from 1..n",
+  "complexity": "O(C(n,k))",
+  "approach": "Backtracking with a start value — choose i, recurse from i+1, un-choose. The worthwhile prune: if even taking ALL remaining numbers can't fill the path to k, stop the loop early (i ≤ n − (k − path.size()) + 1). It cuts the tree dramatically.",
+  "code": "void bt(int start, vector<int>& path) {\n    if ((int)path.size() == k) {\n        res.push_back(path); return;\n    }\n    int need = k - path.size();\n    for (int i = start; i <= n - need + 1; i++) {\n        path.push_back(i);\n        bt(i + 1, path);\n        path.pop_back();\n    }\n}"
+ },
+ "Remove Duplicates from Sorted List": {
+  "difficulty": "Easy",
+  "topic": "Linked List",
+  "signal": "dedupe a sorted linked list",
+  "complexity": "O(n)",
+  "approach": "Sorted means duplicates sit next to each other. Walk once: if the next node equals the current, splice it out (cur->next = cur->next->next); otherwise advance. Only advance when NOT deleting — a triple would survive otherwise.",
+  "code": "ListNode* cur = head;\nwhile (cur && cur->next) {\n    if (cur->next->val == cur->val)\n        cur->next = cur->next->next;  // splice out\n    else\n        cur = cur->next;              // advance\n}\nreturn head;"
+ },
+ "Subsets II": {
+  "difficulty": "Medium",
+  "topic": "Backtracking",
+  "signal": "all subsets, input contains duplicates",
+  "complexity": "O(2ⁿ)",
+  "approach": "Subsets + the duplicate rule: sort first, then at the same tree depth skip an element equal to the one before it (i > start && a[i] == a[i-1]). Duplicates may stack DEEPER (that's [1,2,2]) but never side-by-side at one level (that's the same subset twice).",
+  "code": "void bt(int start, vector<int>& path) {\n    res.push_back(path);\n    for (int i = start; i < n; i++) {\n        if (i > start && nums[i] == nums[i-1])\n            continue;      // dup at same level\n        path.push_back(nums[i]);\n        bt(i + 1, path);\n        path.pop_back();\n    }\n}"
+ }
+}
