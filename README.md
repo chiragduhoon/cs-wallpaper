@@ -1,5 +1,7 @@
 # DSA Revision Wallpaper
 
+![Today's wallpaper: a solved LeetCode problem with the pattern hint on the left and my own C++ solution on the right](docs/wallpaper-example.png)
+
 Every day, your desktop shows a problem **you already solved** —
 description + example on the left, your complete submitted C++ solution
 on the right — so the grind sticks.
