@@ -1,0 +1,5 @@
+# auto-generated at runtime (problem text is LeetCode content; the wallpaper is rebuilt daily)
+cache/
+today.png
+__pycache__/
+*.pyc
